@@ -15,7 +15,7 @@
 void processInput(GLFWwindow *window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
-std::vector<GLfloat> circleCoords(float radius);
+std::pair<std::vector<GLfloat>, std::vector<GLuint>> circleCoords(float radius);
 
 GLFWwindow* StartGLFW();
 
@@ -28,19 +28,13 @@ int main() {
     //making the points of the triangle
     //we use a range of -1 to 1, with the limit of the range being the border of the window
     //also, as openGL is a 3d renderer, the third coordinate is the z axis.
-    GLfloat points[] = {
-        //Coordinates,            Colors,
-         0.5f,   0.5f,  0.0f,       0.0f, 0.1f, 0.3f,
-         0.5f,  -0.5f,  0.0f,       1.0f, 0.2f, 0.2f,
-        -0.5f,  -0.5f,  0.0f,       0.0f, 0.3f, 0.1f,
-        -0.5f,   0.5f,  0.0f,       0.0f, 1.0f, 0.3f,
-    };
+    std::pair<std::vector<GLfloat>, std::vector<GLuint>> temp = circleCoords(0.5f);
 
-    GLuint indices[] ={
-        0, 1, 2, //pos of 1st triangle and etc
-        0, 2, 3
 
-    };
+    std::vector<GLfloat> points = temp.first;
+
+
+    std::vector<GLuint> indices = temp.second;
 
     //just error checks and for debugging
     GLFWwindow* window = StartGLFW();
@@ -58,8 +52,8 @@ int main() {
     VAO VAO1;
     VAO1.Bind();
 
-    VBO VBO1(points, sizeof(points));
-    EBO EBO1(indices, sizeof(indices));
+    VBO VBO1(points.data(), points.size() * sizeof(GLfloat));
+    EBO EBO1(indices.data(), indices.size() * sizeof(GLuint));
 
 
     //link vao to vbo
@@ -77,7 +71,7 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     //finding the amount of vertices
-    int vertAmount = sizeof(points) / sizeof(points[0]);
+    int vertAmount = points.size() / sizeof(GLfloat);
 
     while (!glfwWindowShouldClose(window)) {
         //input
@@ -89,7 +83,7 @@ int main() {
         shaderProgram.Activate();
         VAO1.Bind();
         // I wanna make circles work here as a function
-        glDrawElements(GL_TRIANGLES, vertAmount, GL_UNSIGNED_INT, nullptr);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, points.size());
         //check for events
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -157,11 +151,11 @@ GLFWwindow *StartGLFW()
 }
 
 
-std::vector<GLfloat> circleCoords(float radius) {
+std::pair<std::vector<GLfloat>, std::vector<GLuint>> circleCoords(float radius) {
     const int steps = 20;
     const float angle = 2.0f * M_PI / steps;
     GLfloat color[] = {1.0f, 0.0f, 0.0f};
-    std::vector<GLfloat> newCoords = {0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f};
+    std::vector<GLfloat> newCoords;
     newCoords.reserve((steps + 1) * 6);
 
     newCoords.push_back(0.0f);
@@ -183,5 +177,15 @@ std::vector<GLfloat> circleCoords(float radius) {
         }//repeat of before
     }
 
-    return newCoords;
+
+    std::vector<GLuint> indices;
+    indices.reserve((steps) * 3);
+
+    for (int i=1; i<steps; i++) {
+        indices.push_back(0);
+        indices.push_back(i);
+        indices.push_back(i+1);
+    }
+
+    return {newCoords, indices};
 }
