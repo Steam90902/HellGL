@@ -1,12 +1,13 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-//#include <filesystem>
+#include <filesystem>
 #include <math.h>
 #include "VAO.h"
 #include "VBO.h"
 #include "EBO.h"
 #include "shaderClass.h"
+//#include "errorReporting.h"
 
 
 void processInput(GLFWwindow *window);
@@ -18,15 +19,16 @@ int main() {
     //initialise the glfw
     glfwInit();
 
-    //std::cout << "Current working directory: "
-    //          << std::filesystem::current_path() << std::endl;
+    std::cout << "Current working directory: "
+              << std::filesystem::current_path() << std::endl;
 
-
+    //enableReportGlErrors();
     //no clue yet
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 
 
     //making the points of the triangle

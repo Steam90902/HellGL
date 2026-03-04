@@ -17,6 +17,8 @@ add_executable(ProjOpenGL
         src/EBO.cpp
         include/VAO.h
         src/VAO.cpp
+        #src/errorReporting.cpp
+        #include/errorReporting.h
 )
 
 # ---------------------------
