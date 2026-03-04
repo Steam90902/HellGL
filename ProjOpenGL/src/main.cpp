@@ -3,6 +3,8 @@
 #include <GLFW/glfw3.h>
 #include <filesystem>
 #include <math.h>
+#include <vector>
+
 #include "VAO.h"
 #include "VBO.h"
 #include "EBO.h"
@@ -13,23 +15,15 @@
 void processInput(GLFWwindow *window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
+std::vector<GLfloat> circleCoords(float radius);
 
+GLFWwindow* StartGLFW();
 
 int main() {
     //initialise the glfw
-    glfwInit();
 
     std::cout << "Current working directory: "
               << std::filesystem::current_path() << std::endl;
-
-    //enableReportGlErrors();
-    //no clue yet
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-
 
     //making the points of the triangle
     //we use a range of -1 to 1, with the limit of the range being the border of the window
@@ -49,28 +43,9 @@ int main() {
     };
 
     //just error checks and for debugging
-    GLFWwindow* window = glfwCreateWindow(600, 600, "Triangle", NULL, NULL);
-    if (window == NULL) {
-        std::cout << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
-
-    glfwMakeContextCurrent(window);
-
-    //just little error checks to give a reason for progam failing
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        std::cout << "Failed to initialize GLAD" << std::endl;
-        return -1;
-    }
-
-
-    glViewport(0, 0, 600, 600);
+    GLFWwindow* window = StartGLFW();
 
     Shader shaderProgram("default.vert", "default.frag");
-
-
-
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 
@@ -98,22 +73,23 @@ int main() {
 
 
 
-    glClearColor(0.5f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     //finding the amount of vertices
-    int vertAmount = sizeof(points) / sizeof(points[0]) * 6;
+    int vertAmount = sizeof(points) / sizeof(points[0]);
 
     while (!glfwWindowShouldClose(window)) {
         //input
         processInput(window);
 
         //funny
-        glClearColor(0.5f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         shaderProgram.Activate();
         VAO1.Bind();
-        glDrawElements(GL_TRIANGLES, vertAmount, GL_UNSIGNED_INT, 0);
+        // I wanna make circles work here as a function
+        glDrawElements(GL_TRIANGLES, vertAmount, GL_UNSIGNED_INT, nullptr);
         //check for events
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -142,4 +118,70 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 void processInput(GLFWwindow *window) {
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+}
+
+GLFWwindow *StartGLFW()
+{
+
+    glfwInit();
+
+    if (!glfwInit()) {
+        std::cout << "Failed to initialize GLFW" << std::endl;
+        return nullptr;
+    }
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
+
+
+    GLFWwindow* window = glfwCreateWindow(800, 800, "Particle Hopeful", NULL, NULL);
+
+    if (window == nullptr) {
+        std::cout << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+    }
+
+    glfwMakeContextCurrent(window);
+
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+        std::cout << "Failed to initialize GLAD\n";
+    }
+
+
+    glViewport(0, 0, 800, 800);
+
+    return window;
+}
+
+
+std::vector<GLfloat> circleCoords(float radius) {
+    const int steps = 20;
+    const float angle = 2.0f * M_PI / steps;
+    GLfloat color[] = {1.0f, 0.0f, 0.0f};
+    std::vector<GLfloat> newCoords = {0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f};
+    newCoords.reserve((steps + 1) * 6);
+
+    newCoords.push_back(0.0f);
+    newCoords.push_back(0.0f);
+    newCoords.push_back(0.0f);
+    for (GLfloat c : color) newCoords.push_back(c);
+
+
+
+    for (int i=0; i<=steps; i++) {
+        float newX = sin(angle*i) * radius;
+        float newY = cos(angle*i) * radius;
+        newCoords.push_back(newX);
+        newCoords.push_back(newY);
+        newCoords.push_back(0.0f);
+        //might be a bug here, idk y tho
+        for ( GLfloat ic: color) {
+            newCoords.push_back(ic);
+        }//repeat of before
+    }
+
+    return newCoords;
 }
