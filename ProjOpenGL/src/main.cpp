@@ -35,42 +35,21 @@ int main() {
     //we use a range of -1 to 1, with the limit of the range being the border of the window
     //also, as openGL is a 3d renderer, the third coordinate is the z axis.
     GLfloat points[] = {
-        0.0f, 0.0f, 0.0f, 0.1f, 0.1f, 0.1f,
-        0.0f, 0.09f, 0.0f, 0.1f, 0.1f, 0.1f,
-        0.05f, 0.08f, 0.0f, 0.1f, 0.1f, 0.1f,
-        0.08f, 0.05, 0.0f, 0.1f, 0.1f, 0.1f,
-        0.09f, 0.0f, 0.0f, 0.1f, 0.1f, 0.1f,
-        0.08f, -0.05f, 0.0f, 0.1f, 0.1f, 0.1f,
-        0.05f, -0.08f, 0.0f, 0.1f, 0.1f, 0.1f,
-        0.0f, -0.09f, 0.0f, 0.1f, 0.1f, 0.1f,
-        -0.05f, -0.08f, 0.0f, 0.1f, 0.1f, 0.1f,
-        -0.08f, -0.05, 0.0f, 0.1f, 0.1f, 0.1f,
-        -0.09f, 0.0f, 0.0f, 0.1f, 0.1f, 0.1f,
-        -0.08f, 0.05f, 0.0f, 0.1f, 0.1f, 0.1f,
-        -0.05f, 0.08f, 0.0f, 0.1f, 0.1f, 0.1f,
-        0.0f, 0.09f, 0.0f, 0.1f, 0.1f, 0.1f,
+        //Coordinates,            Colors,
+         0.5f,   0.5f,  0.0f,       0.0f, 0.1f, 0.3f,
+         0.5f,  -0.5f,  0.0f,       1.0f, 0.2f, 0.2f,
+        -0.5f,  -0.5f,  0.0f,       0.0f, 0.3f, 0.1f,
+        -0.5f,   0.5f,  0.0f,       0.0f, 1.0f, 0.3f,
     };
 
     GLuint indices[] ={
         0, 1, 2, //pos of 1st triangle and etc
-        0, 2, 3,
-        0, 3, 4,
-        0, 4, 5,
-        0, 5, 6,
-        0, 6, 7,
-        0, 7, 8,
-        0, 8, 9,
-        0, 9, 10,
-        0, 10, 11,
-        0, 11, 12,
-        0, 12, 13
+        0, 2, 3
+
     };
 
-
-    float xPos = 0; float yPos = 0; float radius = 1.0f;
-
     //just error checks and for debugging
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Triangle", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(600, 600, "Triangle", NULL, NULL);
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -150,7 +129,6 @@ int main() {
 
 
 
-
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;
@@ -162,6 +140,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 }
 
 void processInput(GLFWwindow *window) {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 }
