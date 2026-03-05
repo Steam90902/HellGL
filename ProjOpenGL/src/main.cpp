@@ -4,19 +4,34 @@
 #include <filesystem>
 #include <math.h>
 #include <vector>
-
 #include "VAO.h"
 #include "VBO.h"
 #include "EBO.h"
 #include "shaderClass.h"
-//#include "errorReporting.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+
+
+struct CircleSettings {
+    float radius = 0.1;
+    GLfloat xPos =  0.0f;
+    GLfloat yPos = 0.0f;
+    GLfloat red = 1.0f;
+    GLfloat green = 0.0f;
+    GLfloat blue = 0.0f;
+    int steps = 20;
+    int vertex = steps + 2;
+};
+
 
 
 void processInput(GLFWwindow *window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
-VAO circleCoords(float radius, GLfloat xPos, GLfloat yPos, GLfloat red, GLfloat green, GLfloat blue);
 
+VAO circleCoords(const CircleSettings& Settings);
 GLFWwindow* StartGLFW();
 
 int main() {
@@ -59,7 +74,25 @@ int main() {
     //VBO1.Unbind();
     //EBO1.Unbind();
 
-    VAO circleVAO1 = circleCoords(0.5f, 0.4f, 0.0f, 1.0f, 0.0f, 0.0f);
+
+    CircleSettings a {0.3, 0.55f};
+
+    VAO circleVAO1 = circleCoords(a);
+
+
+    // transformation matrix
+    glm::mat4 transform = glm::mat4(1.0f);
+
+    // Apply transformations
+    transform = glm::translate(transform, glm::vec3(-0.5f, -0.005f, 0.0f)); //move
+    //transform = glm::rotate(transform, glm::radians(45.0f), glm::vec3(0.1f, 0.0f, 0.0f));
+    transform = glm::scale(transform, glm::vec3(0.5f, 0.5f, 0.0f));
+
+
+    //Pass matrix to shader
+    int transformLoc = glGetUniformLocation(shaderProgram.ID, "transform");
+    glUseProgram(shaderProgram.ID);
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -74,10 +107,17 @@ int main() {
         //cool bgd
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        //yOffset -= speed;
+
         shaderProgram.Activate();
+
+        //int offsetLoc = glGetUniformLocation(shaderProgram.ID, "offset");
+        //glUniform2f(offsetLoc, 0.0f, yOffset);
+
         circleVAO1.Bind();
         // I wanna make circles work here as a function
-        glDrawArrays(GL_TRIANGLE_FAN, 0, 22);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, a.vertex);
         //check for events
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -140,23 +180,22 @@ GLFWwindow *StartGLFW()
     return window;
 }
 
-VAO circleCoords(float radius, GLfloat xPos, GLfloat yPos, GLfloat red, GLfloat green, GLfloat blue) {
-    const int steps = 20;
-    const float angle = 2.0f * M_PI / steps;
-    GLfloat color[] = {red, green, blue};
+VAO circleCoords(const CircleSettings& Settings) {
+    const float angle = 2.0f * M_PI / Settings.steps;
+    GLfloat color[] = {Settings.red, Settings.green, Settings.blue};
     std::vector<GLfloat> points;
-    points.reserve((steps + 1) * 6);
+    points.reserve((Settings.steps + 1) * 6);
 
-    points.push_back(xPos);
-    points.push_back(yPos);
+    points.push_back(Settings.xPos);
+    points.push_back(Settings.yPos);
     points.push_back(0.0f);
     for (GLfloat c : color) points.push_back(c);
 
 
 
-    for (int i = 0; i <= steps; i++) {
-        float newX = (sin(angle*i) * radius) + xPos;
-        float newY = (cos(angle*i) * radius) + yPos;
+    for (int i = 0; i <= Settings.steps; i++) {
+        float newX = (sin(angle*i) * Settings.radius) + Settings.xPos;
+        float newY = (cos(angle*i) * Settings.radius) + Settings.yPos;
         points.push_back(newX);
         points.push_back(newY);
         points.push_back(0.0f);

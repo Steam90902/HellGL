@@ -12,8 +12,6 @@
 #include <iostream>
 #include <cerrno>
 
-#include "../glad/include/glad/glad.h"
-
 std::string get_file_contents(const char* filename);
 
 class Shader {
@@ -24,7 +22,5 @@ public:
     void Activate();
     void Delete();
 };
-
-
 
 #endif //PROJOPENGL_SHADERCLASS_H
