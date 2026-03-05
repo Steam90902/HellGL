@@ -15,7 +15,7 @@
 void processInput(GLFWwindow *window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
-VAO circleCoords(float radius);
+VAO circleCoords(float radius, GLfloat xPos, GLfloat yPos, GLfloat red, GLfloat green, GLfloat blue);
 
 GLFWwindow* StartGLFW();
 
@@ -59,7 +59,7 @@ int main() {
     //VBO1.Unbind();
     //EBO1.Unbind();
 
-    VAO circleVAO = circleCoords(0.1f);
+    VAO circleVAO1 = circleCoords(0.5f, 0.4f, 0.0f, 1.0f, 0.0f, 0.0f);
 
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -75,16 +75,16 @@ int main() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         shaderProgram.Activate();
-        circleVAO.Bind();
+        circleVAO1.Bind();
         // I wanna make circles work here as a function
-        glDrawArrays(GL_TRIANGLE_FAN, 0, 20 * 6);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 22);
         //check for events
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
     //delete the variable so no wasted mem
-    circleVAO.Delete();
+    circleVAO1.Delete();
     //VBO1.Delete();
     //EBO1.Delete();
     shaderProgram.Delete();
@@ -140,23 +140,23 @@ GLFWwindow *StartGLFW()
     return window;
 }
 
-VAO circleCoords(float radius) {
+VAO circleCoords(float radius, GLfloat xPos, GLfloat yPos, GLfloat red, GLfloat green, GLfloat blue) {
     const int steps = 20;
     const float angle = 2.0f * M_PI / steps;
-    GLfloat color[] = {1.0f, 0.0f, 0.0f};
+    GLfloat color[] = {red, green, blue};
     std::vector<GLfloat> points;
     points.reserve((steps + 1) * 6);
 
-    points.push_back(0.0f);
-    points.push_back(0.0f);
+    points.push_back(xPos);
+    points.push_back(yPos);
     points.push_back(0.0f);
     for (GLfloat c : color) points.push_back(c);
 
 
 
-    for (int i=0; i<=steps; i++) {
-        float newX = sin(angle*i) * radius;
-        float newY = cos(angle*i) * radius;
+    for (int i = 0; i <= steps; i++) {
+        float newX = (sin(angle*i) * radius) + xPos;
+        float newY = (cos(angle*i) * radius) + yPos;
         points.push_back(newX);
         points.push_back(newY);
         points.push_back(0.0f);
