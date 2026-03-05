@@ -15,7 +15,7 @@
 
 
 struct CircleSettings {
-    float radius = 0.1;
+    GLfloat radius = 0.1f;
     GLfloat xPos =  0.0f;
     GLfloat yPos = 0.0f;
     GLfloat red = 1.0f;
@@ -23,6 +23,7 @@ struct CircleSettings {
     GLfloat blue = 0.0f;
     int steps = 20;
     int vertex = steps + 2;
+    GLfloat hitbox = radius * 1.0002;
 };
 
 
@@ -33,6 +34,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
 VAO circleCoords(const CircleSettings& Settings);
 GLFWwindow* StartGLFW();
+void movement(Shader& shaderProgram, GLfloat xMove, GLfloat yMove);
 
 int main() {
     //initialise the glfw
@@ -75,31 +77,26 @@ int main() {
     //EBO1.Unbind();
 
 
-    CircleSettings a {0.3, 0.55f};
-
+    CircleSettings a {0.1f, 0.55f, 0.8f};
     VAO circleVAO1 = circleCoords(a);
 
 
     // transformation matrix
-    glm::mat4 transform = glm::mat4(1.0f);
+    GLfloat xTrack = abs(a.radius);
 
+
+
+    GLfloat yOffset = 0.0f;   // current translation
+    GLfloat ySpeed = -0.00062f;   // falling speed
+    GLfloat gravity = 0.00015f;
     // Apply transformations
-    transform = glm::translate(transform, glm::vec3(-0.5f, -0.005f, 0.0f)); //move
-    //transform = glm::rotate(transform, glm::radians(45.0f), glm::vec3(0.1f, 0.0f, 0.0f));
-    transform = glm::scale(transform, glm::vec3(0.5f, 0.5f, 0.0f));
-
-
-    //Pass matrix to shader
-    int transformLoc = glGetUniformLocation(shaderProgram.ID, "transform");
-    glUseProgram(shaderProgram.ID);
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     //finding the amount of vertices
     //int vertAmount = points.size() / sizeof(GLfloat);
-
+    int countr = 0;
     while (!glfwWindowShouldClose(window)) {
         //input
         processInput(window);
@@ -108,12 +105,26 @@ int main() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        //yOffset -= speed;
+
+
+
+        yOffset += ySpeed;
+        ySpeed -= gravity;
+        std::cout << yOffset << std::endl;
+        countr += 1;
+        if (abs(yOffset + a.yPos) + a.hitbox >= 1.0f) {
+            //if (ySpeed > 0.0f) {
+                //ySpeed = -ySpeed
+
+            ySpeed = -ySpeed;
+            std::cout << countr << std::endl;
+        }
+
 
         shaderProgram.Activate();
 
-        //int offsetLoc = glGetUniformLocation(shaderProgram.ID, "offset");
-        //glUniform2f(offsetLoc, 0.0f, yOffset);
+        movement(shaderProgram, 0.0f, yOffset);
+
 
         circleVAO1.Bind();
         // I wanna make circles work here as a function
@@ -215,4 +226,19 @@ VAO circleCoords(const CircleSettings& Settings) {
     VBO1.Unbind();
 
     return VAO1;
+}
+
+
+void movement(Shader& shaderProgram,GLfloat xMove, GLfloat yMove) {
+
+    glm::mat4 transform = glm::mat4(1.0f);
+    transform = glm::translate(transform, glm::vec3(xMove, yMove, 0.0f)); //move
+    shaderProgram.Activate();
+
+    int transformLoc = glGetUniformLocation(shaderProgram.ID, "transform");
+    glUseProgram(shaderProgram.ID);
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
+
+
 }
