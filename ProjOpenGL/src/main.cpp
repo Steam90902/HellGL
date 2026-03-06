@@ -87,8 +87,9 @@ int main() {
 
 
     GLfloat yOffset = 0.0f;   // current translation
-    GLfloat ySpeed = -0.00062f;   // falling speed
-    GLfloat gravity = 0.00015f;
+    GLfloat ySpeed = -0.0062f;   // falling speed
+    GLfloat gravity = 0.001f;
+    const GLfloat yImpact = abs(ySpeed);
     // Apply transformations
 
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -113,8 +114,12 @@ int main() {
         std::cout << yOffset << std::endl;
         countr += 1;
         if (abs(yOffset + a.yPos) + a.hitbox >= 1.0f) {
-            //if (ySpeed > 0.0f) {
-                //ySpeed = -ySpeed
+            if (ySpeed > 0.0f) {
+                ySpeed -= yImpact;
+            }
+            if (ySpeed < 0.0f) {
+                ySpeed += yImpact;
+            }
 
             ySpeed = -ySpeed;
             std::cout << countr << std::endl;
