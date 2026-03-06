@@ -23,6 +23,7 @@ struct CircleSettings {
     GLfloat blue = 0.0f;
     int steps = 20;
     int vertex = steps + 2;
+    GLfloat hitbox = radius * 1.0002;
 };
 
 
@@ -81,11 +82,14 @@ int main() {
 
 
     // transformation matrix
+    GLfloat xTrack = abs(a.radius);
+
 
 
     GLfloat yOffset = 0.0f;   // current translation
-    GLfloat speed = 0.05f;   // falling speed
-
+    GLfloat ySpeed = -0.0062f;   // falling speed
+    GLfloat gravity = 0.001f;
+    const GLfloat yImpact = abs(ySpeed);
     // Apply transformations
 
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -93,7 +97,7 @@ int main() {
 
     //finding the amount of vertices
     //int vertAmount = points.size() / sizeof(GLfloat);
-
+    int countr = 0;
     while (!glfwWindowShouldClose(window)) {
         //input
         processInput(window);
@@ -105,15 +109,26 @@ int main() {
 
 
 
-        yOffset -= speed;
-        //int offsetLoc = glGetUniformLocation(shaderProgram.ID, "offset");
-        //glUniform2f(offsetLoc, 0.0f, yOffset);
-        //glm::mat4 transform = glm::mat4(1.0f);
-        //transform = glm::translate(transform, glm::vec3(0.0f, yOffset, 0.0f)); //move
+        yOffset += ySpeed;
+        ySpeed -= gravity;
+        std::cout << yOffset << std::endl;
+        countr += 1;
+        if (abs(yOffset + a.yPos) + a.hitbox >= 1.0f) {
+            if (ySpeed > 0.0f) {
+                ySpeed -= yImpact;
+            }
+            if (ySpeed < 0.0f) {
+                ySpeed += yImpact;
+            }
+
+            ySpeed = -ySpeed;
+            std::cout << countr << std::endl;
+        }
+
 
         shaderProgram.Activate();
 
-        movement(shaderProgram, 0.0f, 0.0f);
+        movement(shaderProgram, 0.0f, yOffset);
 
 
         circleVAO1.Bind();
